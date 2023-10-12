@@ -9,33 +9,31 @@ import {
 import { COLOR_PALETTES } from '../utilities';
 import PalettePreview from '../components/PalettePreview';
 
-import type { CompositeScreenProps } from '@react-navigation/native';
-import type { MainStackParamList, RootStackParamList } from '../types';
+import type { ColorPalette, MainStackScreenProps } from '../types';
 
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-
-type Props = CompositeScreenProps<
-  NativeStackScreenProps<MainStackParamList, 'Home'>,
-  NativeStackScreenProps<RootStackParamList>
->;
-
-const Home = ({ navigation }: Props) => {
+const Home = ({ navigation, route }: MainStackScreenProps) => {
+  const [fetchedPalettes, setFetchedPalettes] = React.useState(COLOR_PALETTES);
   const [palettes, setPalettes] = React.useState(COLOR_PALETTES);
+  const [savedPalettes, setSavedPalettes] = React.useState<ColorPalette[]>([])
   const [isRefreshing, setIsRefreshing] = React.useState(false);
 
   const handleFetchPalettes = React.useCallback(async () => {
     const result = await fetch(
       'https://color-palette-api.kadikraman.vercel.app/palettes',
     );
-    const fetchedPalettes = await result.json();
+    const newFetchedPalettes = await result.json();
     if (result.ok) {
-      setPalettes(fetchedPalettes);
+      setFetchedPalettes(newFetchedPalettes);
     }
   }, []);
 
   React.useEffect(() => {
     handleFetchPalettes();
   }, [handleFetchPalettes]);
+
+  React.useEffect(() => {
+    setPalettes([...savedPalettes, ...fetchedPalettes])
+  }, [savedPalettes, fetchedPalettes])
 
   const handleRefresh = React.useCallback(async () => {
     setIsRefreshing(true);
@@ -45,6 +43,13 @@ const Home = ({ navigation }: Props) => {
     }, 1000);
   }, [handleFetchPalettes]);
 
+  React.useEffect(() => {
+    if (route.params?.newPalette) {
+      const newPalette = route.params.newPalette
+      setSavedPalettes(prevState => ([...prevState, newPalette]))
+    }
+  }, [route])
+
   return (
     <View style={styles.container}>
       <FlatList
@@ -53,7 +58,7 @@ const Home = ({ navigation }: Props) => {
           <PalettePreview
             palette={item}
             onPress={() => {
-              navigation.navigate('MainStack', {
+              navigation.navigate('Main', {
                 screen: 'ColorPalette',
                 params: item,
               });
