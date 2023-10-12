@@ -1,6 +1,5 @@
 import 'react-native-gesture-handler';
 import React from 'react';
-// import { Text, SafeAreaView, StyleSheet, FlatList } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import Home from './screens/Home';
@@ -30,7 +29,7 @@ const App = () => {
     <NavigationContainer>
       <RootStack.Navigator screenOptions={{ presentation: 'modal' }}>
         <RootStack.Screen
-          name="MainStack"
+          name="Main"
           component={MainStackScreen}
           options={{ headerShown: false }}
         />
@@ -43,9 +42,5 @@ const App = () => {
     </NavigationContainer>
   );
 };
-
-// const styles = StyleSheet.create({
-
-// });
 
 export default App;
